@@ -35,7 +35,8 @@ const Login = () => {
 
   return (
     <>
-      <div className="p-4 box">
+    <br></br>
+      <div className="p-4 box container">
         <h2 className="mb-3">Firebase Auth Login</h2>
         {error && <Alert variant="danger">{error}</Alert>}
         <Form onSubmit={handleSubmit}>
@@ -70,7 +71,7 @@ const Login = () => {
           />
         </div>
       </div>
-      <div className="p-4 box mt-3 text-center">
+      <div className="p-4 box mt-3 text-center container">
         Don't have an account? <Link to="/signup">Sign up</Link>
       </div>
     </>

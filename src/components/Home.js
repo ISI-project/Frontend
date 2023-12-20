@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router";
 import { useUserAuth } from "../context/UserAuthContext";
+import MapView from "./MapView.js"
 
 const Home = () => {
   const { logOut, user } = useUserAuth();
@@ -16,14 +17,19 @@ const Home = () => {
   };
   return (
     <>
-      <div className="p-4 box mt-3 text-center">
-        Hello Welcome <br />
-        {user && user.email}
-      </div>
-      <div className="d-grid gap-2">
-        <Button variant="primary" onClick={handleLogout}>
+      <div className="p-4 box mt-3 mb-3 text-center container">
+        <h1>Hello,</h1>
+        <h3>
+          {user && user.email}
+        </h3>
+        <Button variant="danger mb-2" onClick={handleLogout}>
           Log out
         </Button>
+        <MapView />
+        <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
       </div>
     </>
   );
