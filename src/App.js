@@ -17,6 +17,24 @@ function App() {
             }
         };
 
+        const postData = {
+            animal: {
+                name: "mock name",
+                rasa: "mock rasa",
+                description: "mock description",
+                photoUrl: "mock photoUrl",
+                found: true,
+            },
+            state: "false",
+            id_user: "adoffbsdi",
+            location: "mock location",
+        };
+
+        fetch("http://localhost:8080/advertisement/add", {
+            method: "POST",
+            body: JSON.stringify(postData),
+        })
+
         fetchData();
     }, []);
 
