@@ -78,6 +78,9 @@ class ArcGISMap extends Component {
           // Add the graphic to the view
           this.view.graphics.add(pointGraphic);
         });
+        
+
+
 
         this.view.on("click", (event) => {
           // Create a point
