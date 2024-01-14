@@ -14,16 +14,6 @@ const MapView2 = () => {
     
     let view;
 
-    const shelters = [
-      { name: "Adapost Catei Odai", longitude: 26.026977, latitude: 44.522827, address: "Șoseaua Odăii 3-5, București" },
-      { name: "ASPA", longitude: 26.096476, latitude: 44.435613, address: "Strada Constantin Mille 10, București 010142" },
-      { name: "Red Panda Association - Adoption Center", longitude: 26.111482, latitude: 44.466335, address: "Str. Barbu Văcărescu 162-164, București 020284" },
-      { name: "Steaua Speranței", longitude: 26.132178, latitude: 44.483980, address: "Strada Petricani 11A, București 077190" },
-      { name: "Asociatia pentru protectia animalelor Hope", longitude: 26.150375, latitude: 44.409225, address: "Strada Anton Bacalbașa 7, București 077160" },
-      { name: "Dog Rescue Shelter", longitude: 26.150887, latitude: 44.406746, address: "Bucharest" },
-      { name: "Shelter Dogs Pallady", longitude: 26.181123, latitude: 44.409895, address: "Drumul Lunca Jariștei, București" },
-    ];
-
     const markerSymbol = {
       type: "simple-marker",
       color: [226, 119, 40],
@@ -44,9 +34,10 @@ const MapView2 = () => {
       'esri/rest/support/FeatureSet',
       'esri/widgets/Search',
       'esri/PopupTemplate',
+      'esri/layers/FeatureLayer'
 
     ])
-    .then(([esriConfig, Map, MapView, Graphic, route, RouteParameters, FeatureSet, Search, PopupTemplate]) => {
+    .then(([esriConfig, Map, MapView, Graphic, route, RouteParameters, FeatureSet, Search, PopupTemplate, FeatureLayer]) => {
       esriConfig.apiKey = 'AAPKc0c31702c4c249989cc8627d1083a28a331vBGXVA-bJzpwWdvOv94QiCqRazUZMgZEWCDbjOpTXGV0quFPH2tjTfTs8cOUt'; // Replace with your API key
 
       const map = new Map({
@@ -60,47 +51,10 @@ const MapView2 = () => {
         zoom: 13,
       });
 
-      function addShelters() {
-        shelters.forEach(shelter => {
-          // Create a point for each shelter
-          const point = {
-            type: "point",
-            longitude: shelter.longitude,
-            latitude: shelter.latitude,
-          };
-  
-          // Create a popup template
-          const popupTemplate = new PopupTemplate({
-            title: shelter.name,
-            content: [
-              {
-                type: "fields",
-                fieldInfos: [
-                  {
-                    fieldName: "Address",
-                    label: "Address",
-                    visible: true,
-                  },
-                  // Add other fields if needed
-                ],
-              },
-            ],
-          });
-        
-          const pointGraphic = new Graphic({
-            geometry: point,
-            symbol: markerSymbol,
-            attributes: {
-              Address: shelter.address, // Make sure 'address' is part of your shelter object
-              // Add other attribute fields if needed
-            },
-            popupTemplate: popupTemplate,
-          });
-  
-          view.graphics.add(pointGraphic);
-        });
-      }
-      addShelters();
+      const trailheadsLayer = new FeatureLayer({
+        url: "https://services3.arcgis.com/wdx7FlcP4yvxXvlS/arcgis/rest/services/Lista_Adaposturi_Animale_Romania/FeatureServer/0"
+      });
+      map.add(trailheadsLayer)
 
       const search = new Search({  //Add Search widget
         view: view
@@ -116,7 +70,6 @@ const MapView2 = () => {
         } else if (view.graphics.length === 1) {
           addGraphic("destination", event.mapPoint);
           getRoute(); // Call the route service
-          addShelters();
         } else {
           view.graphics.removeAll();
           addGraphic("origin", event.mapPoint);

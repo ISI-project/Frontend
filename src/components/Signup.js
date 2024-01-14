@@ -26,7 +26,7 @@ const Signup = () => {
     <>
     <br></br>
       <div className="p-4 box container">
-        <h2 className="mb-3">Firebase Auth Signup</h2>
+        <h2 className="mb-3">Pet findUp!</h2>
         {error && <Alert variant="danger">{error}</Alert>}
         <Form onSubmit={handleSubmit}>
           <Form.Group className="mb-3" controlId="formBasicEmail">
