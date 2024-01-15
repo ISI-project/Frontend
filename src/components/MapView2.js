@@ -34,10 +34,11 @@ const MapView2 = () => {
       'esri/rest/support/FeatureSet',
       'esri/widgets/Search',
       'esri/PopupTemplate',
+      'esri/widgets/Locate',
       'esri/layers/FeatureLayer'
 
     ])
-    .then(([esriConfig, Map, MapView, Graphic, route, RouteParameters, FeatureSet, Search, PopupTemplate, FeatureLayer]) => {
+    .then(([esriConfig, Map, MapView, Graphic, route, RouteParameters, FeatureSet, Search, PopupTemplate, Locate, FeatureLayer]) => {
       esriConfig.apiKey = 'AAPKc0c31702c4c249989cc8627d1083a28a331vBGXVA-bJzpwWdvOv94QiCqRazUZMgZEWCDbjOpTXGV0quFPH2tjTfTs8cOUt'; // Replace with your API key
 
       const map = new Map({
@@ -88,6 +89,17 @@ const MapView2 = () => {
         view.graphics.add(graphic);
       }
 
+      const locate = new Locate({
+        view: view,
+        useHeadingEnabled: false,
+        goToOverride: function(view, options) {
+          options.target.scale = 1500;
+          return view.goTo(options.target);
+        }
+      });
+
+      view.ui.add(locate, "top-left");
+
       function getRoute() {
         const routeParams = new RouteParameters({
           stops: new FeatureSet({
@@ -95,7 +107,7 @@ const MapView2 = () => {
           }),
           returnDirections: true
         });
-      
+
         route.solve(routeUrl, routeParams)
           .then(function(data) {
             data.routeResults.forEach(function(result) {

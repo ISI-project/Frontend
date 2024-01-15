@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router";
 import { useUserAuth } from "../context/UserAuthContext";
-import MapView from "./MapView.js"
 import MapView2 from "./MapView2.js";
 
 const Home = () => {
