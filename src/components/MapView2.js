@@ -87,8 +87,24 @@ const MapView2 = ({isToggled}) => {
                         // Add your specific logic for the ON state here
                     } else {
                         // Handle click when toggled off
-                        console.log('Button is currently OFF. Handling click when OFF.');
-                        // Add your specific logic for the OFF state here
+                        const postData = {
+                            animal: {
+                                name: "mock name",
+                                rasa: "mock rasa",
+                                description: "mock description",
+                                photoUrl: "mock photoUrl",
+                                found: true,
+                            },
+                            state: "false",
+                            id_user: "adoffbsdi",
+                            latitude: event.mapPoint.latitude,
+                            longitude: event.mapPoint.longitude,
+                        };
+
+                        fetch("http://localhost:8080/advertisement/add", {
+                            method: "POST",
+                            body: JSON.stringify(postData),
+                        })
                     }
                 };
 
