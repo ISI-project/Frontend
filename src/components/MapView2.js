@@ -13,6 +13,7 @@ const MapView2 = ({isToggled}) => {
     const mapRef = useRef();
 
     const [internalToggled, setInternalToggled] = useState(isToggled);
+    const [data, setData] = useState([]);
 
     useEffect(() => {
         setInternalToggled(isToggled);
@@ -41,10 +42,11 @@ const MapView2 = ({isToggled}) => {
             'esri/widgets/Search',
             'esri/PopupTemplate',
             'esri/widgets/Locate',
-            'esri/layers/FeatureLayer'
+            'esri/layers/FeatureLayer',
+            'esri/layers/GraphicsLayer'
 
         ])
-            .then(([esriConfig, Map, MapView, Graphic, route, RouteParameters, FeatureSet, Search, PopupTemplate, Locate, FeatureLayer]) => {
+            .then(([esriConfig, Map, MapView, Graphic, route, RouteParameters, FeatureSet, Search, PopupTemplate, Locate, FeatureLayer, GraphicsLayer]) => {
                 esriConfig.apiKey = 'AAPKc0c31702c4c249989cc8627d1083a28a331vBGXVA-bJzpwWdvOv94QiCqRazUZMgZEWCDbjOpTXGV0quFPH2tjTfTs8cOUt'; // Replace with your API key
 
                 const map = new Map({
@@ -68,6 +70,54 @@ const MapView2 = ({isToggled}) => {
                 });
 
                 view.ui.add(search, "bottom-left"); //Add to the map
+
+                const fetchData = async () => {
+                    try {
+                        const response = await fetch('http://localhost:8080/advertisement/get/false');
+                        const result = await response.json();
+                        setData(result);
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                    }
+                };
+
+                fetchData().then(r => data.map((item) => {
+                    const point = {
+                        type: "point",
+                        longitude: item.longitude,
+                        latitude: item.latitude
+                    };
+
+                    const attributes = {
+                        // name: item.animal.name,
+                        // rasa: item.animal.rasa,
+                        // description: item.animal.description,
+                        // photoUrl: item.animal.photoUrl,
+                        // found: item.animal.found,
+                        id_animal: item.id_animal,
+                        id_user: item.id_user
+                    };
+
+                    const popupTemplate = new PopupTemplate({
+                        title: "{id_animal}",
+                        content: [{
+                            type: "fields",
+                            fieldInfos: [{
+                                fieldName: "id_user"
+                            }]
+                        }]
+                    });
+
+                    const pointGraphic = new Graphic({
+                        geometry: point,
+                        symbol: markerSymbol,
+                        attributes: attributes,
+                        popupTemplate: popupTemplate
+                    });
+
+                    view.graphics.add(pointGraphic);
+
+                }));
 
                 const routeUrl = 'https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World';
 
