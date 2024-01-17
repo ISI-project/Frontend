@@ -5,8 +5,8 @@ import {loadModules} from 'esri-loader';
 
 const MapView2 = ({isToggled}) => {
     const mapStyle = {
-        height: '500px', // Set to your desired height
-        width: '800px', // Set to your desired width
+        height: '800px', // Set to your desired height
+        width: '1270px', // Set to your desired width
         display: 'flex',
         flexDirection: 'row',
     };
@@ -86,22 +86,32 @@ const MapView2 = ({isToggled}) => {
                                     id_user: item.id_user
                                 };
 
-                                const popupTemplate = new PopupTemplate({
-                                    title: "{id_animal}",
-                                    content: [{
-                                        type: "fields",
-                                        fieldInfos: [{
-                                            fieldName: "id_user"
-                                        }]
-                                    }]
-                                });
-
-                                const pointGraphic = new Graphic({
-                                    geometry: point,
-                                    symbol: markerSymbol,
-                                    attributes: attributes,
-                                    popupTemplate: popupTemplate
-                                });
+                            const popupTemplate = new PopupTemplate({
+                              title: "{id_animal}",
+                              content: [{
+                                  type: "text",
+                                  text: "<div>" +
+                                        "<table style='width:100%; border-collapse: collapse;'>" +
+                                        "<tr><th style='border: 1px solid black;'>ID User</th></tr>" +
+                                        "<tr><td style='border: 1px solid black;'>{id_user}</td></tr>" +
+                                        "</table>" +
+                                        "<br><br>" +
+                                        "<div> </div>" +
+                                        "<div> </div>" +
+                                        "<div> </div>" +
+                                        "<div> </div>" +
+                                        "<div> </div>" +
+                                        "<div></div>" +
+                                        "</div>"
+                              }]
+                          });
+         
+                            const pointGraphic = new Graphic({
+                                geometry: point,
+                                symbol: markerSymbol,
+                                attributes: attributes,
+                                popupTemplate: popupTemplate
+                            });
 
                                 markerLayer.add(pointGraphic)
 
