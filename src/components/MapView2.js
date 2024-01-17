@@ -1,22 +1,20 @@
-import React from "react";
-import {useRef, useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {loadModules} from 'esri-loader';
 
 
 const MapView2 = ({isToggled}) => {
     const mapStyle = {
-        height: '500px', // Set to your desired height
-        width: '800px', // Set to your desired width
+        height: '800px', // Set to your desired height
+        width: '1270px', // Set to your desired width
         display: 'flex',
         flexDirection: 'row',
     };
     const mapRef = useRef();
 
     const [internalToggled, setInternalToggled] = useState(isToggled);
-
-    useEffect(() => {
-        setInternalToggled(isToggled);
-    }, [isToggled]);
+    const [data, setData] = useState([]);
+    const mapViewRef = useRef(null);
+    const [clickTrigger, setClickTrigger] = useState(false);
 
     let view;
 
@@ -41,27 +39,57 @@ const MapView2 = ({isToggled}) => {
             'esri/widgets/Search',
             'esri/PopupTemplate',
             'esri/widgets/Locate',
-            'esri/layers/FeatureLayer'
+            'esri/layers/FeatureLayer',
+            'esri/layers/GraphicsLayer'
 
         ])
-            .then(([esriConfig, Map, MapView, Graphic, route, RouteParameters, FeatureSet, Search, PopupTemplate, Locate, FeatureLayer]) => {
+            .then(([esriConfig, Map, MapView, Graphic, route, RouteParameters, FeatureSet, Search, PopupTemplate, Locate, FeatureLayer, GraphicsLayer]) => {
                 esriConfig.apiKey = 'AAPKc0c31702c4c249989cc8627d1083a28a331vBGXVA-bJzpwWdvOv94QiCqRazUZMgZEWCDbjOpTXGV0quFPH2tjTfTs8cOUt'; // Replace with your API key
+                const markerLayer = new GraphicsLayer()
 
-                const map = new Map({
+                if (mapViewRef.current) {
+                    mapViewRef.current.container = null;
+                }
+
+                const initialMap = new Map({
                     basemap: 'arcgis/navigation'
                 });
 
+                const fetchData = async () => {
+                    try {
+                        const response = await fetch('http://localhost:8080/advertisement/get/false');
+                        const result = await response.json();
+                        setData(result);
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                    }
+                };
+
+                fetchData().then(r => {
+                        data.map((item) => {
+
+                            const pointGraphic = createPointGraphic(item);
+                            markerLayer.add(pointGraphic);
+                        })
+
+                        initialMap.add(markerLayer)
+
+                    }
+                )
+
                 const view = new MapView({
                     container: mapRef.current,
-                    map: map,
+                    map: initialMap,
                     center: [26.1025, 44.4268], // Longitude, latitude
                     zoom: 13,
                 });
 
+                mapViewRef.current = view;
+
                 const trailheadsLayer = new FeatureLayer({
                     url: "https://services3.arcgis.com/wdx7FlcP4yvxXvlS/arcgis/rest/services/Lista_Adaposturi_Animale_Romania/FeatureServer/0"
                 });
-                map.add(trailheadsLayer)
+                initialMap.add(trailheadsLayer)
 
                 const search = new Search({  //Add Search widget
                     view: view
@@ -71,7 +99,7 @@ const MapView2 = ({isToggled}) => {
 
                 const routeUrl = 'https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World';
 
-                const clickHandler = (event) => {
+                const clickHandler = async (event) => {
                     if (internalToggled) {
                         // Handle click when toggled on
                         console.log('Button is currently ON. Handling click when ON.');
@@ -89,23 +117,34 @@ const MapView2 = ({isToggled}) => {
                         // Handle click when toggled off
                         const postData = {
                             animal: {
-                                name: "mock name",
-                                rasa: "mock rasa",
-                                description: "mock description",
+                                name: "Azorel",
+                                rasa: "Pechinez",
+                                description: "Nu latra, nu musca",
                                 photoUrl: "mock photoUrl",
                                 found: true,
                             },
                             state: "false",
-                            id_user: "adoffbsdi",
+                            id_user: "matei_baiat_finutz",
                             latitude: event.mapPoint.latitude,
                             longitude: event.mapPoint.longitude,
                         };
 
-                        fetch("http://localhost:8080/advertisement/add", {
+                        await fetch("http://localhost:8080/advertisement/add", {
                             method: "POST",
                             body: JSON.stringify(postData),
                         })
+
+                        await fetchData().then(r => {
+                                data.map((item) => {
+                                    const pointGraphic = createPointGraphic(item);
+                                    markerLayer.add(pointGraphic);
+                                })
+                            }
+                        )
+
+                        clickTrigger ? setClickTrigger(false) : setClickTrigger(true);
                     }
+
                 };
 
                 view.on('click', clickHandler);
@@ -176,18 +215,66 @@ const MapView2 = ({isToggled}) => {
                         });
                 }
 
+                function createPointGraphic(item) {
+                    const point = {
+                        type: "point",
+                        longitude: item.longitude,
+                        latitude: item.latitude
+                    };
+
+                    const attributes = {
+                        name: item.animal.name,
+                        rasa: item.animal.rasa,
+                        description: item.animal.description,
+                        photoUrl: item.animal.photoUrl,
+                        found: item.animal.found,
+                        id_animal: item.id_animal,
+                        id_user: item.id_user
+                    };
+
+                    const popupTemplate = new PopupTemplate({
+                        title: "{name}",
+                        content: [{
+                            type: "text",
+                            text: "<div>" +
+                                "<table style='width:100%; border-collapse: collapse;'>" +
+                                "<div class= \"column\">" + "<h2> ID User </h2>" + "<p>{id_user}</p>" + "</div>" +
+                                "<div class= \"column\">" + "<h2> Rasa </h2>" + "<p>{rasa}</p>" + "</div>" +
+                                "<div class= \"column\">" + "<h2> Descriere </h2>" + "<p>{description}</p>" + "</div>" +
+                                "</table>" +
+                                "</div>"
+                        }]
+                    });
+
+                    return new Graphic({
+                        geometry: point,
+                        symbol: markerSymbol,
+                        attributes: attributes,
+                        popupTemplate: popupTemplate
+                    });
+                }
 
                 // Additional logic...
             })
             .catch(err => console.error(err));
 
+        function timeout(delay) {
+            return new Promise( res => setTimeout(res, delay) );
+        }
+
         return () => {
             if (view) {
                 // Clean up the map view
-                view.container = null;
+                if (mapViewRef.current) {
+                    mapViewRef.current.container = null;
+                }
             }
         };
-    }, [internalToggled, view]);
+    }, [internalToggled, view, clickTrigger]);
+
+    useEffect(() => {
+        setInternalToggled(isToggled);
+    }, [isToggled]);
 
     return (
         <div style={mapStyle}>
@@ -195,5 +282,6 @@ const MapView2 = ({isToggled}) => {
         </div>
     );
 }
+
 
 export default MapView2;
