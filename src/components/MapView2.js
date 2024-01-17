@@ -117,14 +117,14 @@ const MapView2 = ({isToggled}) => {
                         // Handle click when toggled off
                         const postData = {
                             animal: {
-                                name: "mock name",
-                                rasa: "mock rasa",
-                                description: "mock description",
+                                name: "Azorel",
+                                rasa: "Pechinez",
+                                description: "Nu latra, nu musca",
                                 photoUrl: "mock photoUrl",
                                 found: true,
                             },
                             state: "false",
-                            id_user: "adoffbsdi",
+                            id_user: "matei_baiat_finutz",
                             latitude: event.mapPoint.latitude,
                             longitude: event.mapPoint.longitude,
                         };
@@ -238,16 +238,10 @@ const MapView2 = ({isToggled}) => {
                             type: "text",
                             text: "<div>" +
                                 "<table style='width:100%; border-collapse: collapse;'>" +
-                                "<tr><th style='border: 1px solid black;'>ID User</th></tr>" +
-                                "<tr><td style='border: 1px solid black;'>{id_user}</td></tr>" +
+                                "<div class= \"column\">" + "<h2> ID User </h2>" + "<p>{id_user}</p>" + "</div>" +
+                                "<div class= \"column\">" + "<h2> Rasa </h2>" + "<p>{rasa}</p>" + "</div>" +
+                                "<div class= \"column\">" + "<h2> Descriere </h2>" + "<p>{description}</p>" + "</div>" +
                                 "</table>" +
-                                "<br><br>" +
-                                "<div> </div>" +
-                                "<div> </div>" +
-                                "<div> </div>" +
-                                "<div> </div>" +
-                                "<div> </div>" +
-                                "<div></div>" +
                                 "</div>"
                         }]
                     });
