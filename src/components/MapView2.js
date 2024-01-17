@@ -14,6 +14,7 @@ const MapView2 = ({isToggled}) => {
     const [internalToggled, setInternalToggled] = useState(isToggled);
     const [data, setData] = useState([]);
     const mapViewRef = useRef(null);
+    const [clickTrigger, setClickTrigger] = useState(false);
 
     let view;
 
@@ -98,7 +99,7 @@ const MapView2 = ({isToggled}) => {
 
                 const routeUrl = 'https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World';
 
-                const clickHandler = (event) => {
+                const clickHandler = async (event) => {
                     if (internalToggled) {
                         // Handle click when toggled on
                         console.log('Button is currently ON. Handling click when ON.');
@@ -128,19 +129,20 @@ const MapView2 = ({isToggled}) => {
                             longitude: event.mapPoint.longitude,
                         };
 
-                        fetch("http://localhost:8080/advertisement/add", {
+                        await fetch("http://localhost:8080/advertisement/add", {
                             method: "POST",
                             body: JSON.stringify(postData),
                         })
 
-                        fetchData().then(r => {
+                        await fetchData().then(r => {
                                 data.map((item) => {
-
                                     const pointGraphic = createPointGraphic(item);
                                     markerLayer.add(pointGraphic);
                                 })
                             }
                         )
+
+                        clickTrigger ? setClickTrigger(false) : setClickTrigger(true);
                     }
 
                 };
@@ -221,17 +223,17 @@ const MapView2 = ({isToggled}) => {
                     };
 
                     const attributes = {
-                        // name: item.animal.name,
-                        // rasa: item.animal.rasa,
-                        // description: item.animal.description,
-                        // photoUrl: item.animal.photoUrl,
-                        // found: item.animal.found,
+                        name: item.animal.name,
+                        rasa: item.animal.rasa,
+                        description: item.animal.description,
+                        photoUrl: item.animal.photoUrl,
+                        found: item.animal.found,
                         id_animal: item.id_animal,
                         id_user: item.id_user
                     };
 
                     const popupTemplate = new PopupTemplate({
-                        title: "{id_animal}",
+                        title: "{name}",
                         content: [{
                             type: "text",
                             text: "<div>" +
@@ -262,6 +264,10 @@ const MapView2 = ({isToggled}) => {
             })
             .catch(err => console.error(err));
 
+        function timeout(delay) {
+            return new Promise( res => setTimeout(res, delay) );
+        }
+
         return () => {
             if (view) {
                 // Clean up the map view
@@ -270,7 +276,7 @@ const MapView2 = ({isToggled}) => {
                 }
             }
         };
-    }, [internalToggled, view]);
+    }, [internalToggled, view, clickTrigger]);
 
     useEffect(() => {
         setInternalToggled(isToggled);
